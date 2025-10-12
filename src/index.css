@@ -1,51 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600;700&family=Noto+Sans+Tamil:wght@300;400;500;600;700&family=Noto+Sans+Gurmukhi:wght@300;400;500;600;700&family=Noto+Sans+Malayalam:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Preload Devanagari font for better performance */
+@font-face {
+  font-family: 'Noto Sans Devanagari';
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/notosansdevanagari/v26/TuGoUUFzXI5FBtUq5a8bjKYTZjtRU6Sgv3NaV_SNmI0b8KZNTiKBLqb.woff2') format('woff2');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
+Advanced typography support for Indian scripts
 */
 
 @layer base {
   :root {
-    --background: 32 95% 98%;
-    --foreground: 240 15% 15%;
+    --background: 315 100% 98%;
+    --foreground: 260 15% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 15% 15%;
+    --card-foreground: 260 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 15% 15%;
+    --popover-foreground: 260 15% 15%;
 
-    --primary: 28 85% 55%;
+    --primary: 280 95% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 70% 45%;
+    --secondary: 200 85% 55%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 32 30% 95%;
-    --muted-foreground: 240 10% 45%;
+    --muted: 315 30% 96%;
+    --muted-foreground: 260 10% 45%;
 
-    --accent: 145 65% 45%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 95% 60%;
+    --accent-foreground: 260 15% 15%;
 
-    --destructive: 0 75% 55%;
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 32 25% 88%;
-    --input: 32 25% 88%;
-    --ring: 28 85% 55%;
+    --border: 315 25% 90%;
+    --input: 315 25% 92%;
+    --ring: 280 95% 65%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    --gradient-sunrise: linear-gradient(135deg, hsl(28 85% 55%), hsl(18 90% 60%));
-    --gradient-hero: linear-gradient(180deg, hsl(32 95% 98%), hsl(32 90% 95%));
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(32 50% 97%));
+    --gradient-sunrise: linear-gradient(135deg, hsl(280 95% 65%), hsl(320 90% 70%), hsl(45 95% 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(315 100% 98%), hsl(280 50% 95%), hsl(200 60% 96%));
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%), hsl(315 40% 97%), hsl(280 30% 98%));
 
-    --shadow-soft: 0 4px 20px hsl(28 85% 55% / 0.15);
-    --shadow-card: 0 8px 30px hsl(0 0% 0% / 0.08);
+    --shadow-soft: 0 8px 32px hsl(280 95% 65% / 0.2);
+    --shadow-card: 0 12px 40px hsl(280 60% 30% / 0.12);
+    --shadow-glow: 0 0 20px hsl(280 95% 65% / 0.3);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Enhanced gradients for colorful UI */
+    --gradient-rainbow: linear-gradient(135deg, hsl(280 95% 65%), hsl(320 90% 70%), hsl(45 95% 60%), hsl(200 85% 55%), hsl(145 70% 50%));
+    --gradient-pulse: linear-gradient(135deg, hsl(280 95% 65%), hsl(280 95% 75%));
+    --gradient-success: linear-gradient(135deg, hsl(145 70% 50%), hsl(145 80% 60%));
+    --gradient-warning: linear-gradient(135deg, hsl(45 95% 60%), hsl(35 90% 65%));
+    --gradient-info: linear-gradient(135deg, hsl(200 85% 55%), hsl(220 80% 60%));
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -58,37 +76,37 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 240 15% 8%;
-    --foreground: 32 30% 95%;
+    --background: 260 20% 8%;
+    --foreground: 315 30% 95%;
 
-    --card: 240 12% 12%;
-    --card-foreground: 32 30% 95%;
+    --card: 260 15% 12%;
+    --card-foreground: 315 30% 95%;
 
-    --popover: 240 12% 12%;
-    --popover-foreground: 32 30% 95%;
+    --popover: 260 15% 12%;
+    --popover-foreground: 315 30% 95%;
 
-    --primary: 28 85% 60%;
-    --primary-foreground: 240 15% 8%;
+    --primary: 280 95% 70%;
+    --primary-foreground: 260 20% 8%;
 
-    --secondary: 220 70% 50%;
+    --secondary: 200 85% 60%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 10% 18%;
-    --muted-foreground: 32 15% 65%;
+    --muted: 260 10% 18%;
+    --muted-foreground: 315 15% 65%;
 
-    --accent: 145 60% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 95% 65%;
+    --accent-foreground: 260 20% 8%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 85% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 10% 18%;
-    --input: 240 10% 18%;
-    --ring: 28 85% 60%;
+    --border: 260 10% 20%;
+    --input: 260 10% 22%;
+    --ring: 280 95% 70%;
 
-    --gradient-sunrise: linear-gradient(135deg, hsl(28 85% 60%), hsl(18 90% 65%));
-    --gradient-hero: linear-gradient(180deg, hsl(240 15% 8%), hsl(240 12% 12%));
-    --gradient-card: linear-gradient(145deg, hsl(240 12% 12%), hsl(240 10% 15%));
+    --gradient-sunrise: linear-gradient(135deg, hsl(280 95% 70%), hsl(320 90% 75%), hsl(45 95% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(260 20% 8%), hsl(280 25% 12%), hsl(200 30% 15%));
+    --gradient-card: linear-gradient(145deg, hsl(260 15% 12%), hsl(280 20% 15%), hsl(315 15% 16%));
 
     --shadow-soft: 0 4px 20px hsl(28 85% 60% / 0.25);
     --shadow-card: 0 8px 30px hsl(0 0% 0% / 0.4);
@@ -111,5 +129,202 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Enhanced typography for Indian scripts */
+  .font-devanagari {
+    font-family: 'Noto Sans Devanagari', 'Arial Unicode MS', sans-serif !important;
+    font-feature-settings: "liga" 1, "calt" 1, "kern" 1, "mark" 1, "mkmk" 1, "abvm" 1, "blwm" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-variant-ligatures: common-ligatures contextual;
+    direction: ltr;
+    unicode-bidi: normal;
+  }
+
+  .font-tamil {
+    font-family: 'Noto Sans Tamil', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: "liga" 1, "calt" 1, "kern" 1, "mark" 1, "mkmk" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  .font-gurmukhi {
+    font-family: 'Noto Sans Gurmukhi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: "liga" 1, "calt" 1, "kern" 1, "mark" 1, "mkmk" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  .font-malayalam {
+    font-family: 'Noto Sans Malayalam', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: "liga" 1, "calt" 1, "kern" 1, "mark" 1, "mkmk" 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  .font-latin {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-feature-settings: "liga" 1, "calt" 1, "kern" 1;
+  }
+
+  /* Advanced text layout features */
+  .text-indic {
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+    word-spacing: 0.1em;
+    hyphens: auto;
+    overflow-wrap: break-word;
+    word-break: keep-all;
+  }
+
+  .text-devanagari {
+    font-family: 'Noto Sans Devanagari', 'Arial Unicode MS', sans-serif !important;
+    font-feature-settings: "liga" 1, "calt" 1, "kern" 1, "mark" 1, "mkmk" 1, "abvm" 1, "blwm" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-variant-ligatures: common-ligatures contextual;
+    font-size: 1.15em;
+    line-height: 2;
+    letter-spacing: 0.02em;
+    word-spacing: 0.1em;
+    hyphens: auto;
+    overflow-wrap: break-word;
+    word-break: keep-all;
+    direction: ltr;
+    unicode-bidi: normal;
+  }
+
+  .text-tamil {
+    @apply font-tamil text-indic;
+    font-size: 1.05em;
+  }
+
+  .text-gurmukhi {
+    @apply font-gurmukhi text-indic;
+    font-size: 1.08em;
+  }
+
+  .text-malayalam {
+    @apply font-malayalam text-indic;
+    font-size: 1.06em;
+  }
+
+  /* Enhanced readability for mixed scripts */
+  .mixed-script {
+    font-variant-numeric: proportional-nums;
+    font-feature-settings: "tnum" 0, "lnum" 0;
+  }
+
+  /* Improved text selection and highlighting */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+  }
+
+  /* Better spacing for conjuncts and compound characters */
+  .conjunct-aware {
+    text-align: justify;
+    text-justify: inter-character;
+  }
+}
+
+@layer components {
+  /* Colorful gradient buttons */
+  .btn-rainbow {
+    background: var(--gradient-rainbow);
+    color: white;
+    border: none;
+    box-shadow: var(--shadow-glow);
+    transition: var(--transition-smooth);
+  }
+  
+  .btn-rainbow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 48px hsl(280 95% 65% / 0.4);
+  }
+
+  /* Animated gradient backgrounds */
+  .bg-rainbow {
+    background: var(--gradient-rainbow);
+    background-size: 400% 400%;
+    animation: gradientShift 8s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Colorful cards */
+  .card-colorful {
+    background: var(--gradient-card);
+    border: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(10px);
+    border-radius: var(--radius);
+  }
+
+  .card-glow {
+    box-shadow: var(--shadow-glow);
+    border: 1px solid hsl(var(--primary) / 0.3);
+  }
+
+  /* Pulse animations */
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulseGlow {
+    from { box-shadow: 0 0 10px hsl(var(--primary) / 0.3); }
+    to { box-shadow: 0 0 30px hsl(var(--primary) / 0.6); }
+  }
+
+  /* Success/Warning/Info styles */
+  .bg-success-gradient { background: var(--gradient-success); }
+  .bg-warning-gradient { background: var(--gradient-warning); }
+  .bg-info-gradient { background: var(--gradient-info); }
+
+  /* Floating animation */
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  /* Color cycling animations */
+  .color-cycle {
+    animation: colorCycle 4s ease-in-out infinite;
+  }
+
+  @keyframes colorCycle {
+    0%, 100% { color: hsl(280 95% 65%); }
+    33% { color: hsl(320 90% 70%); }
+    66% { color: hsl(45 95% 60%); }
+  }
+
+  /* Bounce on hover */
+  .bounce-hover:hover {
+    animation: bounceScale 0.3s ease-in-out;
+  }
+
+  @keyframes bounceScale {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
   }
 }
