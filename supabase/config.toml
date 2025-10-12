@@ -1,0 +1,4 @@
+project_id = "evtvnqtotgnyrphlkbto"
+
+[functions.transliterate]
+verify_jwt = false
