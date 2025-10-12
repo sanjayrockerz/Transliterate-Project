@@ -2,3 +2,6 @@ project_id = "evtvnqtotgnyrphlkbto"
 
 [functions.transliterate]
 verify_jwt = false
+
+[functions.ocr]
+verify_jwt = false

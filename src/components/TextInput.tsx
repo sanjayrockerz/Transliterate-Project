@@ -12,12 +12,36 @@ export function TextInput({ value, onChange }: TextInputProps) {
   const [inputMode, setInputMode] = useState<"text" | "camera">("text");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // In a real implementation, this would use OCR to extract text from the image
-      // For now, we'll show a placeholder message
-      onChange("Image OCR coming soon! Please use text input for now.");
+      try {
+        // Convert image to base64
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64Image = reader.result as string;
+          
+          // Call OCR function
+          const { supabase } = await import("@/integrations/supabase/client");
+          onChange("Processing image...");
+          
+          const { data, error } = await supabase.functions.invoke("ocr", {
+            body: { imageBase64: base64Image },
+          });
+
+          if (error) throw error;
+
+          if (data?.extractedText && data.extractedText !== "NO_TEXT_FOUND") {
+            onChange(data.extractedText);
+          } else {
+            onChange("No text found in image. Please try another image.");
+          }
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error("OCR error:", error);
+        onChange("Failed to process image. Please try again.");
+      }
     }
   };
 

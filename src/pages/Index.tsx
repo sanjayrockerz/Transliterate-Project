@@ -12,8 +12,12 @@ import heroImage from "@/assets/hero-scripts.jpg";
 const Index = () => {
   const [inputText, setInputText] = useState("");
   const [sourceScript, setSourceScript] = useState<Script>("devanagari");
-  const [targetScript, setTargetScript] = useState<Script>("tamil");
-  const [result, setResult] = useState("");
+  const [results, setResults] = useState<Record<Script, string>>({
+    devanagari: "",
+    tamil: "",
+    gurumukhi: "",
+    malayalam: "",
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleTransliterate = async () => {
@@ -22,31 +26,36 @@ const Index = () => {
       return;
     }
 
-    if (sourceScript === targetScript) {
-      toast.error("Please select different source and target scripts");
-      return;
-    }
-
     setIsLoading(true);
-    setResult("");
+    setResults({ devanagari: "", tamil: "", gurumukhi: "", malayalam: "" });
+
+    const allScripts: Script[] = ["devanagari", "tamil", "gurumukhi", "malayalam"];
+    const targetScripts = allScripts.filter(script => script !== sourceScript);
 
     try {
-      const { data, error } = await supabase.functions.invoke("transliterate", {
-        body: {
-          text: inputText,
-          sourceScript,
-          targetScript,
-        },
+      const transliterationPromises = targetScripts.map(async (targetScript) => {
+        const { data, error } = await supabase.functions.invoke("transliterate", {
+          body: {
+            text: inputText,
+            sourceScript,
+            targetScript,
+          },
+        });
+
+        if (error) throw error;
+        return { script: targetScript, text: data?.transliteratedText || "" };
       });
 
-      if (error) throw error;
-
-      if (data?.transliteratedText) {
-        setResult(data.transliteratedText);
-        toast.success("Transliteration complete!");
-      } else {
-        throw new Error("No result returned");
-      }
+      const transliterations = await Promise.all(transliterationPromises);
+      
+      const newResults = { ...results };
+      transliterations.forEach(({ script, text }) => {
+        newResults[script] = text;
+      });
+      newResults[sourceScript] = inputText;
+      
+      setResults(newResults);
+      toast.success("Transliteration complete!");
     } catch (error) {
       console.error("Transliteration error:", error);
       toast.error("Failed to transliterate. Please try again.");
@@ -87,19 +96,12 @@ const Index = () => {
       <div className="container mx-auto px-4 pb-12 max-w-4xl">
         <Card className="p-6 md:p-8 bg-card shadow-card border-border">
           <div className="space-y-6">
-            {/* Script Selectors */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <ScriptSelector
-                value={sourceScript}
-                onChange={setSourceScript}
-                label="From Script"
-              />
-              <ScriptSelector
-                value={targetScript}
-                onChange={setTargetScript}
-                label="To Script"
-              />
-            </div>
+            {/* Script Selector */}
+            <ScriptSelector
+              value={sourceScript}
+              onChange={setSourceScript}
+              label="Source Script (Language of the sign)"
+            />
 
             {/* Text Input */}
             <TextInput value={inputText} onChange={setInputText} />
@@ -115,8 +117,43 @@ const Index = () => {
               {isLoading ? "Transliterating..." : "Transliterate"}
             </Button>
 
-            {/* Result */}
-            <TransliterationResult result={result} isLoading={isLoading} />
+            {/* Results */}
+            {(isLoading || Object.values(results).some(r => r)) && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Transliterations in All Scripts:
+                </h3>
+                <div className="grid gap-4">
+                  {(["devanagari", "tamil", "gurumukhi", "malayalam"] as Script[]).map((script) => {
+                    const scriptLabels = {
+                      devanagari: "देवनागरी (Devanagari)",
+                      tamil: "தமிழ் (Tamil)",
+                      gurumukhi: "ਗੁਰਮੁਖੀ (Gurumukhi)",
+                      malayalam: "മലയാളം (Malayalam)",
+                    };
+                    
+                    return (
+                      <Card key={script} className="p-4 bg-gradient-card border-border shadow-card">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-sm font-medium text-muted-foreground">
+                            {scriptLabels[script]}
+                          </h4>
+                        </div>
+                        {isLoading ? (
+                          <div className="flex items-center justify-center py-4">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                          </div>
+                        ) : (
+                          <div className="text-xl font-medium text-foreground leading-relaxed p-3 bg-background/50 rounded-lg">
+                            {results[script] || "-"}
+                          </div>
+                        )}
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </Card>
 
