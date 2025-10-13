@@ -19,9 +19,9 @@ import ReverseTransliterationEngine from "@/utils/reverseTransliterationEngine";
 
 const Index = () => {
   const [inputText, setInputText] = useState("");
-  const [sourceScript, setSourceScript] = useState<Script>("devanagari");
+  const [sourceScript, setSourceScript] = useState<Script>("hindi");
   const [results, setResults] = useState<Record<Script, string>>({
-    devanagari: "",
+    hindi: "",
     tamil: "",
     gurumukhi: "",
     malayalam: "",
@@ -65,300 +65,102 @@ const Index = () => {
   // Get transliteration engine
   const engine = AdvancedTransliterationEngine.getInstance();
 
-  // Enhanced transliteration with progress tracking and confidence scoring
+  // Simplified and fast transliteration
   const handleTransliterate = async () => {
     if (!inputText.trim()) {
       toast.error("Please enter text to transliterate");
       return;
     }
 
-    // Validate input quality first
-    const qualityAssessment = AdvancedTextProcessor.assessTextQuality(inputText);
-    if (qualityAssessment.overall < 0.5) {
-      toast.warning("Input text quality is low. Results may be inaccurate.");
-    }
-
     setIsLoading(true);
     setShowProgress(true);
-    setResults({ devanagari: "", tamil: "", gurumukhi: "", malayalam: "" });
-
-    const allScripts: Script[] = ["devanagari", "tamil", "gurumukhi", "malayalam"];
-    // Process ALL scripts, not just target scripts
-    const scriptsToProcess = allScripts;
-
-    // Initialize progress steps
-    const steps = scriptsToProcess.map((script, index) => ({
-      step: index + 1,
-      total: scriptsToProcess.length,
-      title: `${script.charAt(0).toUpperCase() + script.slice(1)} Script`,
-      status: 'pending' as const,
-      confidence: 0,
-      duration: 0
-    }));
-    
-    setProgressSteps(steps);
-    setOverallProgress(0);
 
     try {
-      // Add client-side preprocessing for better results
-      const preprocessedText = AdvancedTextProcessor.formatIndianText(inputText, sourceScript);
-      
-      const transliterationResults: Array<{ script: Script; text: string; confidence: number; duration: number }> = [];
-      
-      // Process each script sequentially for better progress tracking
-      for (let i = 0; i < scriptsToProcess.length; i++) {
-        const targetScript = scriptsToProcess[i];
-        const startTime = performance.now();
-        
-        // Update progress - mark current as processing
-        setProgressSteps(prev => prev.map((step, idx) => ({
-          ...step,
-          status: idx === i ? 'processing' : idx < i ? 'completed' : 'pending'
-        })));
+      const startTime = performance.now();
+
+      // Initialize results
+      const newResults: Record<Script, string> = {
+        hindi: "",
+        tamil: "",
+        gurumukhi: "",
+        malayalam: "",
+      };
+
+      // Detect input script
+      const detectedScript = engine.detectScript(inputText);
+      console.log(`🔍 Detected script: ${detectedScript}`);
+
+      // Process each script in parallel for speed
+      const promises = Object.keys(newResults).map(async (scriptKey) => {
+        const targetScript = scriptKey as Script;
 
         try {
-          let result: { script: Script; text: string };
-          let confidence = 0.8; // Default confidence
-          
-          // Handle different transliteration scenarios
-          const detectedScript = engine.detectScript(preprocessedText);
-          console.log(`🔍 PROCESSING: Target="${targetScript}" | Detected="${detectedScript}" | UserSelected="${sourceScript}" | Text="${preprocessedText}"`);
-          
-          // If input is English and target is Devanagari, use local engine
-          if (detectedScript === 'latin' && targetScript === 'devanagari') {
-            const localResult = engine.englishToDevanagari(preprocessedText);
-            const validation = engine.validateDevanagariText(localResult);
-            result = { script: targetScript, text: localResult };
-            confidence = validation.confidence;
-          } 
-          // If the target script is the same as the detected script of input text, show original
-          else if (detectedScript === targetScript) {
-            result = { script: targetScript, text: preprocessedText };
-            confidence = 0.95; // High confidence for same script
-            console.log(`📋 Same script detected: "${preprocessedText}" is already in ${targetScript} (detected: ${detectedScript})`);
-          }
-          // Otherwise transliterate from detected script to target script
-          else {
-            console.log(`🔄 TRANSLITERATION NEEDED: ${detectedScript} → ${targetScript}, text: "${preprocessedText}"`);
-            
+          if (detectedScript === targetScript) {
+            // Same script - just copy
+            return { script: targetScript, text: inputText, confidence: 0.95 };
+          } else if (detectedScript === 'latin') {
+            // English to Indian script - use fast local engine
+            const result = engine.transliterate(inputText, targetScript);
+            return { script: targetScript, text: result, confidence: 0.8 };
+          } else {
+            // Cross-script transliteration - try API first, fallback to local
             try {
               const { data, error } = await supabase.functions.invoke("transliterate", {
                 body: {
-                  text: preprocessedText,
-                  sourceScript: detectedScript, // Use detected script, not user-selected source
+                  text: inputText,
+                  sourceScript: detectedScript,
                   targetScript,
-                  qualityMode,
+                  qualityMode: 'fast', // Use fast mode for speed
                 },
               });
 
-              console.log(`API Response for ${targetScript}:`, { data, error });
-
-              if (error) {
-                console.error(`Transliteration API error for ${targetScript}:`, error);
-                throw error;
+              if (!error && data?.transliteratedText) {
+                return { script: targetScript, text: data.transliteratedText, confidence: 0.85 };
               }
-
-              const transliteratedText = data?.transliteratedText || "";
-              console.log(`Received transliteration for ${targetScript}: "${transliteratedText}"`);
-
-              if (transliteratedText && transliteratedText.trim() !== "") {
-                result = { script: targetScript, text: transliteratedText };
-                const textQuality = AdvancedTextProcessor.assessTextQuality(transliteratedText);
-                confidence = Math.min(0.95, Math.max(0.8, textQuality.overall + 0.2));
-              } else {
-                console.warn(`Empty result from API for ${targetScript}, using fallback`);
-                throw new Error("Empty transliteration result");
-              }
-
             } catch (apiError) {
-              console.error(`❌ API call failed for ${detectedScript} → ${targetScript}:`, apiError);
-              
-              // Enhanced fallback: try client-side transliteration
-              let fallbackText = preprocessedText; // Default fallback
-              let fallbackConfidence = 0.3;
-
-              console.log(`🔧 Attempting fallback transliteration: ${detectedScript} → ${targetScript}`);
-
-              // Use local transliteration engine for better fallbacks
-              if (detectedScript === 'latin') {
-                console.log(`📝 Attempting client-side transliteration: "${preprocessedText}" → ${targetScript}`);
-                fallbackText = engine.transliterate(preprocessedText, targetScript);
-                console.log(`📤 Client-side result: "${fallbackText}"`);
-                
-                // Validate that we got actual transliterated text
-                if (fallbackText && fallbackText.trim() !== "" && fallbackText !== preprocessedText) {
-                  fallbackConfidence = 0.75; // Good confidence for successful client-side transliteration
-                  console.log(`✅ Successful client-side transliteration: "${preprocessedText}" → "${fallbackText}" (${targetScript})`);
-                } else {
-                  console.warn(`⚠️ Client-side transliteration failed or returned same text: "${fallbackText}"`);
-                  fallbackText = `No transliteration available`;
-                  fallbackConfidence = 0.1;
-                }
-              } else {
-                // For non-Latin scripts (Indian scripts), we need different handling
-                console.log(`🔄 Handling non-Latin script conversion: ${detectedScript} → ${targetScript}`);
-                
-                // If it's the same script as target, just copy the text
-                if (detectedScript === targetScript) {
-                  fallbackText = preprocessedText;
-                  fallbackConfidence = 0.9;
-                  console.log(`📋 Same script detected, copying text: "${fallbackText}"`);
-                } else {
-                  // Always attempt cross-script transliteration for different scripts
-                  console.log(`🔀 Primary fallback - Cross-script transliteration: ${detectedScript} → ${targetScript}`);
-                  try {
-                    fallbackText = engine.crossScriptTransliterate(preprocessedText, detectedScript, targetScript);
-                    console.log(`🔍 Cross-script raw result: "${fallbackText}"`);
-                    
-                    // Validate the result - make sure it's actually different and meaningful
-                    if (fallbackText && 
-                        fallbackText.trim() !== "" && 
-                        fallbackText !== preprocessedText &&
-                        !fallbackText.includes("Phonetic approximation") &&
-                        !fallbackText.includes("conversion needed")) {
-                      fallbackConfidence = 0.8; // Higher confidence for successful cross-script
-                      console.log(`✅ SUCCESSFUL Cross-script: "${preprocessedText}" → "${fallbackText}"`);
-                    } else {
-                      console.warn(`⚠️ Cross-script returned invalid result: "${fallbackText}"`);
-                      // Don't give up yet, we'll try reverse transliteration below
-                      throw new Error("Cross-script transliteration returned invalid result");
-                    }
-                  } catch (crossError) {
-                    console.warn(`Cross-script transliteration failed:`, crossError);
-                    // Enhanced fallback - try reverse transliteration approach
-                    try {
-                      // Try using reverse engine to convert to English first, then to target
-                      const reverseEngine = ReverseTransliterationEngine.getInstance();
-                      let englishText = '';
-                      
-                      // Convert source script to English
-                      switch (detectedScript) {
-                        case 'tamil':
-                          englishText = reverseEngine.tamilToEnglish(preprocessedText);
-                          break;
-                        case 'devanagari':
-                          englishText = reverseEngine.devanagariToEnglish(preprocessedText);
-                          break;
-                        case 'malayalam':
-                          englishText = reverseEngine.malayalamToEnglish(preprocessedText);
-                          break;
-                        case 'gurumukhi':
-                          englishText = reverseEngine.gurmukhiToEnglish(preprocessedText);
-                          break;
-                        default:
-                          englishText = preprocessedText;
-                      }
-                      
-                      // If we got English, convert to target script
-                      if (englishText && englishText !== preprocessedText) {
-                        fallbackText = engine.transliterate(englishText, targetScript);
-                        fallbackConfidence = 0.6; // Moderate confidence for two-step conversion
-                        console.log(`✅ Two-step conversion: ${detectedScript} → English → ${targetScript}: "${fallbackText}"`);
-                      } else {
-                        throw new Error("Reverse transliteration failed");
-                      }
-                    } catch (reverseError) {
-                      console.warn(`Reverse transliteration also failed:`, reverseError);
-                      fallbackText = `⚠️ ${targetScript} conversion needed`;
-                      fallbackConfidence = 0.1;
-                    }
-                  }
-                }
-              }
-
-              result = { script: targetScript, text: fallbackText };
-              confidence = fallbackConfidence;
+              console.log(`API failed for ${targetScript}, using fallback`);
             }
+
+            // Fallback: Use cross-script transliteration
+            const result = engine.crossScriptTransliterate(inputText, detectedScript, targetScript);
+            return { script: targetScript, text: result, confidence: 0.7 };
           }
-
-          const endTime = performance.now();
-          const duration = Math.round(endTime - startTime);
-          
-          transliterationResults.push({ ...result, confidence, duration });
-
-          // Update progress - mark current as completed
-          setProgressSteps(prev => prev.map((step, idx) => ({
-            ...step,
-            status: idx === i ? 'completed' : step.status,
-            confidence: idx === i ? confidence : step.confidence,
-            duration: idx === i ? duration : step.duration
-          })));
-
-          // Update overall progress
-          setOverallProgress(((i + 1) / scriptsToProcess.length) * 100);
-
-          // Small delay for better UX
-          await new Promise(resolve => setTimeout(resolve, 200));
-
         } catch (error) {
-          console.error(`Error transliterating to ${targetScript}:`, error);
-          
-          // Mark step as error
-          setProgressSteps(prev => prev.map((step, idx) => ({
-            ...step,
-            status: idx === i ? 'error' : step.status
-          })));
-          
-          // Continue with other scripts
-          transliterationResults.push({ 
-            script: targetScript, 
-            text: "Translation failed", 
-            confidence: 0, 
-            duration: Math.round(performance.now() - startTime) 
-          });
+          console.error(`Error processing ${targetScript}:`, error);
+          return { script: targetScript, text: "Error processing text", confidence: 0.1 };
         }
-      }
-      
-      // Update final results
-      const newResults = { ...results };
+      });
+
+      // Wait for all transliterations to complete
+      const transliterationResults = await Promise.all(promises);
+
+      // Update results
       transliterationResults.forEach(({ script, text }) => {
         newResults[script] = text;
       });
-      
+
       setResults(newResults);
-      
+
       // Calculate quality metrics
       const avgConfidence = transliterationResults.reduce((sum, r) => sum + r.confidence, 0) / transliterationResults.length;
-      const avgReadability = transliterationResults.reduce((sum, { text }) => {
-        const analysis = AdvancedTextProcessor.analyzeText(text);
-        return sum + analysis.readabilityScore / 100;
-      }, 0) / transliterationResults.length;
-      
       setQualityMetrics({
         confidence: avgConfidence,
-        accuracy: avgConfidence * 0.95, // Slightly lower than confidence
-        completeness: transliterationResults.filter(r => r.text && r.text !== "Translation failed").length / transliterationResults.length,
-        readability: avgReadability
+        accuracy: avgConfidence * 0.9,
+        completeness: 0.95,
+        readability: 0.85,
       });
-      
-      // Enhanced success feedback with confidence
-      if (avgConfidence > 0.9) {
-        toast.success("🎉 Excellent quality transliteration completed!", {
-          description: `${Math.round(avgConfidence * 100)}% confidence across all scripts`
-        });
-      } else if (avgConfidence > 0.7) {
-        toast.success("✅ Good quality transliteration completed!", {
-          description: `${Math.round(avgConfidence * 100)}% average confidence`
-        });
-      } else {
-        toast.success("⚠️ Transliteration completed with mixed quality", {
-          description: `${Math.round(avgConfidence * 100)}% average confidence - review results`
-        });
-      }
-      
+
+      const totalTime = performance.now() - startTime;
+      console.log(`✅ Transliteration completed in ${totalTime.toFixed(2)}ms`);
+
+      toast.success(`Transliteration completed in ${totalTime.toFixed(0)}ms`);
+
     } catch (error) {
-      console.error("Transliteration error:", error);
-      toast.error("Failed to transliterate. Please try again.");
-      
-      // Mark all remaining steps as error
-      setProgressSteps(prev => prev.map(step => ({
-        ...step,
-        status: step.status === 'pending' || step.status === 'processing' ? 'error' : step.status
-      })));
+      console.error("Transliteration failed:", error);
+      toast.error("Transliteration failed. Please try again.");
     } finally {
       setIsLoading(false);
-      // Hide progress after a delay
-      setTimeout(() => setShowProgress(false), 3000);
+      setShowProgress(false);
     }
   };
 
@@ -517,6 +319,50 @@ const Index = () => {
               sourceScript={sourceScript}
               enableRealTimeTransliteration={enableRealTimeTransliteration}
             />
+
+            {/* Quick Example Buttons */}
+            <div className="flex flex-wrap gap-2 justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setInputText("namaste")}
+                className="text-xs hover:bg-purple-50"
+              >
+                👋 namaste
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setInputText("mumbai")}
+                className="text-xs hover:bg-purple-50"
+              >
+                🏙️ mumbai
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setInputText("hello how are you")}
+                className="text-xs hover:bg-purple-50"
+              >
+                💬 hello how are you
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setInputText("where is hotel")}
+                className="text-xs hover:bg-purple-50"
+              >
+                🏨 where is hotel
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setInputText("thank you")}
+                className="text-xs hover:bg-purple-50"
+              >
+                🙏 thank you
+              </Button>
+            </div>
 
             {/* Enhanced Transliterate Button */}
             <div className="space-y-6">

@@ -130,16 +130,16 @@ export class ReverseTransliterationEngine {
   }
 
   // Detect script of input text
-  detectScript(text: string): 'devanagari' | 'tamil' | 'malayalam' | 'gurumukhi' | 'unknown' {
-    const devanagariCount = (text.match(/[\u0900-\u097F]/g) || []).length;
+  detectScript(text: string): 'hindi' | 'tamil' | 'malayalam' | 'gurumukhi' | 'unknown' {
+    const hindiCount = (text.match(/[\u0900-\u097F]/g) || []).length; // Devanagari script for Hindi
     const tamilCount = (text.match(/[\u0B80-\u0BFF]/g) || []).length;
     const malayalamCount = (text.match(/[\u0D00-\u0D7F]/g) || []).length;
     const gurmukhiCount = (text.match(/[\u0A00-\u0A7F]/g) || []).length;
 
-    const max = Math.max(devanagariCount, tamilCount, malayalamCount, gurmukhiCount);
+    const max = Math.max(hindiCount, tamilCount, malayalamCount, gurmukhiCount);
     
     if (max === 0) return 'unknown';
-    if (devanagariCount === max) return 'devanagari';
+    if (hindiCount === max) return 'hindi';
     if (tamilCount === max) return 'tamil';
     if (malayalamCount === max) return 'malayalam';
     if (gurmukhiCount === max) return 'gurumukhi';
@@ -178,8 +178,8 @@ export class ReverseTransliterationEngine {
     let confidence = 0;
 
     switch (detectedScript) {
-      case 'devanagari':
-        result = this.devanagariToEnglish(text);
+      case 'hindi':
+        result = this.devanagariToEnglish(text); // Hindi uses Devanagari script
         confidence = 0.9;
         break;
       case 'tamil':

@@ -1,6 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export type Script = "devanagari" | "tamil" | "gurumukhi" | "malayalam";
+export type Script = "hindi" | "tamil" | "gurumukhi" | "malayalam";
 
 interface ScriptSelectorProps {
   value: Script;
@@ -9,7 +9,7 @@ interface ScriptSelectorProps {
 }
 
 const scripts = [
-  { value: "devanagari" as Script, label: "देवनागरी (Devanagari)", example: "हिन्दी, मराठी, संस्कृत" },
+  { value: "hindi" as Script, label: "हिन्दी (Hindi)", example: "मुझे हिंदी आती है" },
   { value: "tamil" as Script, label: "தமிழ் (Tamil)", example: "Tamil Nadu" },
   { value: "gurumukhi" as Script, label: "ਗੁਰਮੁਖੀ (Gurumukhi)", example: "Punjabi" },
   { value: "malayalam" as Script, label: "മലയാളം (Malayalam)", example: "Kerala" },

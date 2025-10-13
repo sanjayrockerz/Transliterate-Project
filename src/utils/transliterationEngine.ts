@@ -36,7 +36,13 @@ export const englishToDevanagariMap: TransliterationMapping = {
   '5': '५', '6': '६', '7': '७', '8': '८', '9': '९',
   
   // Common English words phonetically
-  'hello': 'हैलो', 'namaste': 'नमस्ते', 'dhanyawad': 'धन्यवाद',
+  'hello': 'हैलो', 'namaste': 'नमस्ते', 'dhanyawad': 'धन्यवाद', 'thank you': 'धन्यवाद',
+  'good morning': 'सुप्रभात', 'good evening': 'शुभ संध्या', 'good night': 'शुभ रात्रि',
+  'how are you': 'आप कैसे हैं', 'what is your name': 'आपका नाम क्या है',
+  'where is': 'कहाँ है', 'how much': 'कितना', 'please': 'कृपया', 'sorry': 'माफ़ करना',
+  'yes': 'हाँ', 'no': 'नहीं', 'water': 'पानी', 'food': 'खाना', 'help': 'मदद',
+  'hotel': 'होटल', 'restaurant': 'रेस्तराँ', 'hospital': 'अस्पताल', 'station': 'स्टेशन',
+  'airport': 'हवाईअड्डा', 'bus stop': 'बस स्टॉप', 'market': 'बाज़ार',
   'mumbai': 'मुंबई', 'delhi': 'दिल्ली', 'bangalore': 'बंगलोर',
   'hyderabad': 'हैदराबाद', 'chennai': 'चेन्नै', 'kolkata': 'कोलकाता',
   'ahmedabad': 'अहमदाबाद', 'pune': 'पुणे', 'surat': 'सूरत',
@@ -227,7 +233,7 @@ export class AdvancedTransliterationEngine {
   // Detect script of input text with confidence
   detectScript(text: string): string {
     const scriptTests = [
-      { regex: /[\u0900-\u097F]/, script: 'devanagari' },
+      { regex: /[\u0900-\u097F]/, script: 'hindi' }, // Devanagari script used for Hindi
       { regex: /[\u0B80-\u0BFF]/, script: 'tamil' },
       { regex: /[\u0A00-\u0A7F]/, script: 'gurumukhi' },
       { regex: /[\u0D00-\u0D7F]/, script: 'malayalam' }
@@ -251,7 +257,7 @@ export class AdvancedTransliterationEngine {
   // Get appropriate CSS class for script
   getScriptClass(script: string): string {
     const classMap = {
-      'devanagari': 'text-devanagari',
+      'hindi': 'text-hindi',
       'tamil': 'text-tamil', 
       'gurumukhi': 'text-gurmukhi',
       'malayalam': 'text-malayalam',
@@ -321,8 +327,8 @@ export class AdvancedTransliterationEngine {
   // Universal transliterate method
   transliterate(text: string, targetScript: string): string {
     switch (targetScript) {
-      case 'devanagari':
-        return this.englishToDevanagari(text);
+      case 'hindi':
+        return this.englishToDevanagari(text); // Hindi uses Devanagari script
       case 'tamil':
         return this.englishToTamil(text);
       case 'malayalam':
@@ -340,10 +346,10 @@ export class AdvancedTransliterationEngine {
     
     try {
       // Special handling for common conversions
-      if (sourceScript === 'tamil' && targetScript === 'devanagari') {
-        // Direct Tamil to Devanagari conversion
+      if (sourceScript === 'tamil' && targetScript === 'hindi') {
+        // Direct Tamil to Hindi conversion
         const result = this.tamilToDevanagariDirect(text);
-        console.log(`📝 Tamil→Devanagari direct: "${text}" → "${result}"`);
+        console.log(`📝 Tamil→Hindi direct: "${text}" → "${result}"`);
         if (result && result !== text) {
           return result;
         }
@@ -355,7 +361,7 @@ export class AdvancedTransliterationEngine {
       // First convert the source script to English phonetics
       let englishPhonetics = '';
       switch (sourceScript) {
-        case 'devanagari':
+        case 'hindi':
           englishPhonetics = reverseEngine.devanagariToEnglish(text);
           break;
         case 'tamil':

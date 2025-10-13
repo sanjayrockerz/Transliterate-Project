@@ -163,88 +163,23 @@ SCRIPTS = {
     }
 }
 
-# Advanced Transliteration Engine (EXACT from React app)
-class AdvancedTransliterationEngine:
+# Transliteration Engine
+class SimpleTransliterationEngine:
     def __init__(self):
-        # COMPLETE Tamil to Devanagari mapping (from your React app)
-        self.tamil_to_devanagari_map = {
-            # Vowels
+        # Tamil to Devanagari mapping
+        self.tamil_to_devanagari = {
             'அ': 'अ', 'ஆ': 'आ', 'இ': 'इ', 'ஈ': 'ई', 'உ': 'उ', 'ஊ': 'ऊ',
             'எ': 'ए', 'ஏ': 'ऐ', 'ஐ': 'ऐ', 'ஒ': 'ओ', 'ஓ': 'औ', 'ஔ': 'औ',
-            
-            # Consonants
             'க': 'क', 'ங': 'ङ', 'ச': 'च', 'ஞ': 'ञ', 'ட': 'ट', 'ண': 'ण',
             'த': 'त', 'ந': 'न', 'ப': 'प', 'ம': 'म', 'ய': 'य', 'ர': 'र',
             'ல': 'ल', 'வ': 'व', 'ழ': 'ष', 'ள': 'ळ', 'ற': 'र', 'ன': 'न',
-            
-            # Special characters
-            'ஸ': 'स', 'ஶ': 'श', 'ஜ': 'ज', 'ஹ': 'ह',
-            
-            # Complete combinations (from your React app)
-            'கா': 'का', 'கி': 'कि', 'கீ': 'की', 'கு': 'कु', 'கூ': 'कू',
-            'கே': 'के', 'கை': 'कै', 'கோ': 'को', 'கௌ': 'कौ',
-            'தா': 'ता', 'தி': 'ति', 'தீ': 'ती', 'து': 'तु', 'தூ': 'तू',
-            'தே': 'ते', 'தை': 'तै', 'தோ': 'तो', 'தௌ': 'तौ',
-            'நா': 'ना', 'நி': 'नि', 'நீ': 'नी', 'நு': 'नु', 'நூ': 'नू',
-            'நே': 'ने', 'நை': 'नै', 'நோ': 'नो', 'நௌ': 'नौ',
-            'மா': 'मा', 'மி': 'मि', 'மீ': 'मी', 'மு': 'मु', 'மூ': 'मू',
-            'மே': 'मे', 'மை': 'मै', 'மோ': 'मो', 'மௌ': 'मौ',
-            'வா': 'वा', 'வி': 'वि', 'வீ': 'वी', 'வு': 'वु', 'வூ': 'वू',
-            'வே': 'वे', 'வை': 'वै', 'வோ': 'वो', 'வௌ': 'वौ',
-            'பா': 'पा', 'பி': 'पि', 'பீ': 'पी', 'பு': 'पु', 'பூ': 'पू',
-            'பே': 'पे', 'பை': 'पै', 'போ': 'पो', 'பௌ': 'पौ',
-            'லா': 'ला', 'லி': 'लि', 'லீ': 'ली', 'லு': 'लु', 'லூ': 'लू',
-            'லே': 'ले', 'லै': 'लै', 'லோ': 'लो', 'லௌ': 'लौ',
-            'ரா': 'रा', 'ரி': 'रि', 'ரீ': 'री', 'ரு': 'रु', 'ரூ': 'रू',
-            'ரே': 'रे', 'ரै': 'रै', 'ரோ': 'रो', 'ரௌ': 'रौ',
-            # Common words
-            'ஹரே': 'हरे', 'பாபா': 'बाबा', 'மாமா': 'मामा'
+            'ஸ': 'स', 'ஶ': 'श', 'ஜ': 'ज', 'ஹ': 'ह'
         }
         
-        # Tamil to Malayalam mapping
-        self.tamil_to_malayalam_map = {
-            'அ': 'അ', 'ஆ': 'ആ', 'இ': 'ഇ', 'ஈ': 'ഈ', 'உ': 'ഉ', 'ஊ': 'ഊ',
-            'எ': 'എ', 'ஏ': 'ഏ', 'ஐ': 'ഐ', 'ஒ': 'ഒ', 'ஓ': 'ഓ', 'ஔ': 'ഔ',
-            'க': 'ക', 'ங': 'ങ', 'ச': 'ച', 'ஞ': 'ഞ', 'ட': 'ട', 'ண': 'ണ',
-            'த': 'ത', 'ந': 'ന', 'ப': 'പ', 'ம': 'മ', 'ய': 'യ', 'ர': 'ര',
-            'ல': 'ല', 'வ': 'വ', 'ழ': 'ഴ', 'ள': 'ള', 'ற': 'റ', 'ன': 'ൻ',
-            'ஸ': 'സ', 'ஶ': 'ശ', 'ஜ': 'ജ', 'ஹ': 'ഹ',
-            # Words
-            'ஹரே': 'ഹരേ', 'பாபா': 'ബാബാ', 'மாமா': 'മാമാ'
-        }
-        
-        # Tamil to Gurmukhi mapping
-        self.tamil_to_gurmukhi_map = {
-            'அ': 'ਅ', 'ஆ': 'ਆ', 'இ': 'ਇ', 'ஈ': 'ਈ', 'உ': 'ਉ', 'ஊ': 'ਊ',
-            'எ': 'ਏ', 'ஏ': 'ਏ', 'ஐ': 'ਐ', 'ஒ': 'ਓ', 'ஓ': 'ਔ', 'ஔ': 'ਔ',
-            'க': 'ਕ', 'ங': 'ਙ', 'ச': 'ਚ', 'ஞ': 'ਞ', 'ட': 'ਟ', 'ண': 'ਣ',
-            'த': 'ਤ', 'ந': 'ਨ', 'ப': 'ਪ', 'ம': 'ਮ', 'ய': 'ਯ', 'ர': 'ਰ',
-            'ல': 'ਲ', 'வ': 'ਵ', 'ழ': 'ਸ਼', 'ள': 'ਲ਼', 'ற': 'ਰ', 'ன': 'ਨ',
-            'ஸ': 'ਸ', 'ஶ': 'ਸ਼', 'ஜ': 'ਜ', 'ஹ': 'ਹ',
-            # Words
-            'ஹரே': 'ਹਰੇ', 'பாபா': 'ਬਾਬਾ', 'மாமா': 'ਮਾਮਾ'
-        }
-        
-        # English to all scripts
+        # English to Devanagari
         self.english_to_devanagari = {
-            'hare': 'हरे', 'baba': 'बाबा', 'mama': 'मामा',
-            'hello': 'हैलो', 'namaste': 'नमस्ते', 'thank': 'धन्य', 'you': 'वाद',
+            'namaste': 'नमस्ते', 'hello': 'हैलो', 'thank': 'धन्य', 'you': 'वाद',
             'please': 'कृपया', 'water': 'पानी', 'food': 'खाना', 'help': 'सहायता'
-        }
-        
-        self.english_to_tamil = {
-            'hare': 'ஹரே', 'baba': 'பாபா', 'mama': 'மாமா',
-            'hello': 'ஹலோ', 'namaste': 'நமஸ்தே'
-        }
-        
-        self.english_to_malayalam = {
-            'hare': 'ഹരേ', 'baba': 'ബാബാ', 'mama': 'മാമാ',
-            'hello': 'ഹലോ', 'namaste': 'നമസ്തേ'
-        }
-        
-        self.english_to_gurmukhi = {
-            'hare': 'ਹਰੇ', 'baba': 'ਬਾਬਾ', 'mama': 'ਮਾਮਾ',
-            'hello': 'ਹਲੋ', 'namaste': 'ਨਮਸਤੇ'
         }
 
     def detect_script(self, text: str) -> str:
@@ -268,99 +203,23 @@ class AdvancedTransliterationEngine:
         detected = max(script_counts.items(), key=lambda x: x[1])
         return detected[0] if detected[1] > 0 else "latin"
 
-    def tamil_to_devanagari_direct(self, text: str) -> str:
-        """Direct Tamil to Devanagari conversion using complete mapping"""
-        result = ""
-        i = 0
-        while i < len(text):
-            # Try 3-character combinations first
-            if i <= len(text) - 3:
-                three_char = text[i:i+3]
-                if three_char in self.tamil_to_devanagari_map:
-                    result += self.tamil_to_devanagari_map[three_char]
-                    i += 3
-                    continue
-            
-            # Try 2-character combinations
-            if i <= len(text) - 2:
-                two_char = text[i:i+2]
-                if two_char in self.tamil_to_devanagari_map:
-                    result += self.tamil_to_devanagari_map[two_char]
-                    i += 2
-                    continue
-            
-            # Single character mapping
-            char = text[i]
-            if char in self.tamil_to_devanagari_map:
-                result += self.tamil_to_devanagari_map[char]
-            else:
-                result += char
-            i += 1
-        
-        return result
-
-    def transliterate_words(self, text: str, source_script: str, target_script: str) -> str:
-        """Transliterate by words and characters"""
-        words = text.strip().split()
-        result_words = []
-        
-        for word in words:
-            word_lower = word.lower()
-            
-            # Try word-level mapping first
-            if source_script == 'latin' and target_script == Script.DEVANAGARI:
-                if word_lower in self.english_to_devanagari:
-                    result_words.append(self.english_to_devanagari[word_lower])
-                    continue
-            elif source_script == 'latin' and target_script == Script.TAMIL:
-                if word_lower in self.english_to_tamil:
-                    result_words.append(self.english_to_tamil[word_lower])
-                    continue
-            elif source_script == 'latin' and target_script == Script.MALAYALAM:
-                if word_lower in self.english_to_malayalam:
-                    result_words.append(self.english_to_malayalam[word_lower])
-                    continue
-            elif source_script == 'latin' and target_script == Script.GURMUKHI:
-                if word_lower in self.english_to_gurmukhi:
-                    result_words.append(self.english_to_gurmukhi[word_lower])
-                    continue
-            
-            # Character by character conversion
-            converted_word = ""
-            if source_script == Script.TAMIL and target_script == Script.DEVANAGARI:
-                converted_word = self.tamil_to_devanagari_direct(word)
-            elif source_script == Script.TAMIL and target_script == Script.MALAYALAM:
-                for char in word:
-                    converted_word += self.tamil_to_malayalam_map.get(char, char)
-            elif source_script == Script.TAMIL and target_script == Script.GURMUKHI:
-                for char in word:
-                    converted_word += self.tamil_to_gurmukhi_map.get(char, char)
-            else:
-                converted_word = word
-            
-            result_words.append(converted_word)
-        
-        return " ".join(result_words)
-
     def transliterate(self, text: str, source_script: str, target_script: str) -> TransliterationResult:
         if source_script == target_script:
             return TransliterationResult(text, 0.95, "same_script")
         
-        # Use advanced word-based transliteration
-        result_text = self.transliterate_words(text, source_script, target_script)
+        if source_script == Script.TAMIL and target_script == Script.DEVANAGARI:
+            result = ""
+            for char in text:
+                result += self.tamil_to_devanagari.get(char, char)
+            return TransliterationResult(result, 0.9, "direct_mapping")
         
-        # Determine confidence based on conversion quality
-        if result_text != text and any(char in result_text for char in "अआइईउऊएऐओऔकखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसहാആইঈউঊএঐওঔকখগঘঙচছজঝঞটঠডঢণতথদধনপফবভমযরলশষসহઅઆઇઈઉઊએઐઓઔકખગઘઙચછજઝઞટઠડઢણતથદધનપફબભમયરલવશષસહ"):
-            confidence = 0.9
-            method = "advanced_mapping"
-        elif result_text != text:
-            confidence = 0.8
-            method = "partial_mapping"
-        else:
-            confidence = 0.6
-            method = "no_conversion"
+        if source_script == 'latin' and target_script == Script.DEVANAGARI:
+            words = text.lower().split()
+            result = " ".join([self.english_to_devanagari.get(word, word) for word in words])
+            return TransliterationResult(result, 0.8, "english_to_devanagari")
         
-        return TransliterationResult(result_text, confidence, method)
+        # Basic phonetic approximation
+        return TransliterationResult(f"[{SCRIPTS[target_script]['name']} conversion]", 0.6, "phonetic")
 
 # Tourist phrases
 TOURIST_PHRASES = {
@@ -395,7 +254,7 @@ if 'results' not in st.session_state:
 # Initialize engine
 @st.cache_resource
 def get_engine():
-    return AdvancedTransliterationEngine()
+    return SimpleTransliterationEngine()
 
 engine = get_engine()
 
