@@ -15,7 +15,7 @@ interface TextInputProps {
 export function TextInput({ 
   value, 
   onChange, 
-  sourceScript = "devanagari",
+  sourceScript = "hindi",
   enableRealTimeTransliteration = false 
 }: TextInputProps) {
   const [inputMode, setInputMode] = useState<"text" | "camera" | "voice">("text");
@@ -42,8 +42,8 @@ export function TextInput({
 
   // Handle real-time transliteration for English input
   const handleTextChange = (newValue: string) => {
-    if (enableRealTimeTransliteration && detectedScript === 'latin' && sourceScript === 'devanagari') {
-      // Real-time English to Devanagari transliteration
+    if (enableRealTimeTransliteration && detectedScript === 'latin' && sourceScript === 'hindi') {
+      // Real-time English to Hindi transliteration
       const transliterated = engine.englishToDevanagari(newValue);
       onChange(transliterated);
     } else {
@@ -190,7 +190,7 @@ export function TextInput({
         onChange={(e) => handleTextChange(e.target.value)}
         placeholder={`Enter text to transliterate...${enableRealTimeTransliteration ? ' (Try typing in English!)' : ''}`}
         className={`min-h-[120px] bg-card border-border shadow-sm resize-none ${scriptClass} transition-all duration-200`}
-        dir={detectedScript === 'devanagari' ? 'ltr' : 'auto'}
+        dir={detectedScript === 'hindi' ? 'ltr' : 'auto'}
         spellCheck={detectedScript === 'latin'}
       />
 

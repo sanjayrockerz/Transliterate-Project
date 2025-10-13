@@ -348,7 +348,7 @@ export function TouristTranslator({ onTranslationSelect }: TouristTranslatorProp
               <div className="grid gap-3">
                 {Object.entries(translations).map(([script, translation]) => {
                   const scriptLabels = {
-                    devanagari: 'हिंदी (Hindi)',
+                    hindi: 'हिंदी (Hindi)',
                     tamil: 'தமிழ் (Tamil)',
                     malayalam: 'മലയാളം (Malayalam)',
                     gurumukhi: 'ਪੰਜਾਬੀ (Punjabi)'

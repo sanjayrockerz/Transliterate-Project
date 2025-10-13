@@ -185,10 +185,10 @@ const Index = () => {
             Read Bharat
           </h1>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-4 font-medium">
-            ✨ Transliterate street signs and text across Indian scripts with AI magic ✨
+            ✨ Transliterate text to Hindi (हिन्दी) and other Indian scripts with AI magic ✨
           </p>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
-            Seamlessly read signboards in different languages as you travel across Bharat
+            Perfect for tourists: Convert English to Hindi • Read signboards • Travel with confidence
           </p>
         </div>
       </div>
@@ -320,48 +320,59 @@ const Index = () => {
               enableRealTimeTransliteration={enableRealTimeTransliteration}
             />
 
-            {/* Quick Example Buttons */}
-            <div className="flex flex-wrap gap-2 justify-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setInputText("namaste")}
-                className="text-xs hover:bg-purple-50"
-              >
-                👋 namaste
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setInputText("mumbai")}
-                className="text-xs hover:bg-purple-50"
-              >
-                🏙️ mumbai
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setInputText("hello how are you")}
-                className="text-xs hover:bg-purple-50"
-              >
-                💬 hello how are you
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setInputText("where is hotel")}
-                className="text-xs hover:bg-purple-50"
-              >
-                🏨 where is hotel
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setInputText("thank you")}
-                className="text-xs hover:bg-purple-50"
-              >
-                🙏 thank you
-              </Button>
+            {/* Quick Hindi Example Buttons */}
+            <div className="space-y-2">
+              <p className="text-sm text-center text-muted-foreground font-medium">✨ Try these Hindi examples:</p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setInputText("namaste")}
+                  className="text-xs hover:bg-purple-50 border-purple-200"
+                >
+                  👋 namaste → नमस्ते
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setInputText("thank you")}
+                  className="text-xs hover:bg-purple-50 border-purple-200"
+                >
+                  🙏 thank you → धन्यवाद
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setInputText("how are you")}
+                  className="text-xs hover:bg-purple-50 border-purple-200"
+                >
+                  💬 how are you → आप कैसे हैं
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setInputText("where is hotel")}
+                  className="text-xs hover:bg-purple-50 border-purple-200"
+                >
+                  🏨 where is hotel → कहाँ है होटल
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setInputText("good morning")}
+                  className="text-xs hover:bg-purple-50 border-purple-200"
+                >
+                  🌅 good morning → सुप्रभात
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setInputText("mumbai station")}
+                  className="text-xs hover:bg-purple-50 border-purple-200"
+                >
+                  � mumbai station → मुंबई स्टेशन
+                </Button>
+              </div>
             </div>
 
             {/* Enhanced Transliterate Button */}
@@ -442,10 +453,10 @@ const Index = () => {
                 </div>
 
                 <div className="grid gap-6 md:grid-cols-2">
-                  {(["devanagari", "tamil", "gurumukhi", "malayalam"] as Script[]).map((script) => {
-                    const scriptLabels = {
-                      devanagari: "देवनागरी (Devanagari)",
-                      tamil: "தமிழ் (Tamil)", 
+                  {(["hindi", "tamil", "gurumukhi", "malayalam"] as Script[]).map((script) => {
+                    const scriptNames = {
+                      hindi: "हिन्दी (Hindi)",
+                      tamil: "தமிழ் (Tamil)",
                       gurumukhi: "ਗੁਰਮੁਖੀ (Gurumukhi)",
                       malayalam: "മലയാളം (Malayalam)",
                     };
@@ -458,7 +469,7 @@ const Index = () => {
                       <div key={script} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <h4 className="text-sm font-medium text-foreground flex items-center gap-2">
-                            {scriptLabels[script]}
+                            {scriptNames[script]}
                             {script === sourceScript && (
                               <span className="px-2 py-1 text-xs bg-primary/20 text-primary rounded-full">
                                 Source

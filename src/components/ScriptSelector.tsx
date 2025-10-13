@@ -9,7 +9,7 @@ interface ScriptSelectorProps {
 }
 
 const scripts = [
-  { value: "hindi" as Script, label: "हिन्दी (Hindi)", example: "मुझे हिंदी आती है" },
+  { value: "hindi" as Script, label: "हिन्दी (Hindi)", example: "नमस्ते, धन्यवाद, कैसे हैं आप?" },
   { value: "tamil" as Script, label: "தமிழ் (Tamil)", example: "Tamil Nadu" },
   { value: "gurumukhi" as Script, label: "ਗੁਰਮੁਖੀ (Gurumukhi)", example: "Punjabi" },
   { value: "malayalam" as Script, label: "മലയാളം (Malayalam)", example: "Kerala" },

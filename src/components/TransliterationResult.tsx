@@ -12,7 +12,7 @@ interface TransliterationResultProps {
   showAnalysis?: boolean;
 }
 
-export function TransliterationResult({ result, isLoading, script = 'devanagari', showAnalysis = false }: TransliterationResultProps) {
+export function TransliterationResult({ result, isLoading, script = 'hindi', showAnalysis = false }: TransliterationResultProps) {
   const [copied, setCopied] = useState(false);
   const [showStats, setShowStats] = useState(false);
 
