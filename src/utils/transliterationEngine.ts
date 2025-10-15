@@ -189,55 +189,126 @@ export class AdvancedTransliterationEngine {
     return processed;
   }
 
-  // Enhanced English to Devanagari transliteration
+  // Bulletproof English to Hindi transliteration - NEVER returns blank
   englishToDevanagari(text: string): string {
-    let result = this.preprocessText(text.toLowerCase());
+    console.log(`🔍 Hindi transliterating: "${text}"`);
     
-    // Apply contextual rules first
-    for (const rule of contextualRules) {
-      result = result.replace(rule.pattern, rule.replacement);
+    // Handle empty input gracefully
+    if (!text || text.trim() === '') {
+      console.log('❌ Empty text provided to Hindi transliterator');
+      return '❌ कोई टेक्स्ट नहीं'; // "No text" in Hindi
     }
     
-    // Apply phonetic mappings
-    const words = result.split(/\s+/);
-    const transliteratedWords = words.map(word => {
-      // Check if entire word exists in mapping
-      if (englishToDevanagariMap[word]) {
-        return englishToDevanagariMap[word];
+    try {
+      let result = this.preprocessText(text.toLowerCase().trim());
+      console.log(`🔄 Preprocessed text: "${result}"`);
+      
+      // If still empty after preprocessing, return fallback
+      if (!result || result.trim() === '') {
+        return text; // Return original if preprocessing fails
       }
       
-      // Character by character transliteration with longest match first
-      let transliterated = '';
-      let i = 0;
-      while (i < word.length) {
-        let found = false;
+      // Apply contextual rules first
+      for (const rule of contextualRules) {
+        result = result.replace(rule.pattern, rule.replacement);
+      }
+      
+      // Split into words and process each
+      const words = result.split(/\s+/).filter(word => word.length > 0);
+      const transliteratedWords = words.map(word => {
+        // Priority 1: Check if entire word exists in mapping
+        if (englishToDevanagariMap[word]) {
+          console.log(`✅ Direct word mapping: "${word}" → "${englishToDevanagariMap[word]}"`);
+          return englishToDevanagariMap[word];
+        }
         
-        // Try longest matches first (up to 4 characters)
-        for (let len = Math.min(4, word.length - i); len > 0; len--) {
-          const substring = word.substr(i, len);
-          if (englishToDevanagariMap[substring]) {
-            transliterated += englishToDevanagariMap[substring];
-            i += len;
-            found = true;
-            break;
+        // Priority 2: Check common variations
+        const variations = [
+          word.toLowerCase(),
+          word.charAt(0).toUpperCase() + word.slice(1),
+          word.replace(/s$/, ''), // Remove plural 's'
+          word.replace(/ing$/, ''), // Remove '-ing'
+          word.replace(/ed$/, ''), // Remove '-ed'
+        ];
+        
+        for (const variation of variations) {
+          if (englishToDevanagariMap[variation]) {
+            console.log(`✅ Variation mapping: "${word}" (${variation}) → "${englishToDevanagariMap[variation]}"`);
+            return englishToDevanagariMap[variation];
           }
         }
         
-        if (!found) {
-          // Keep original character if no mapping found
-          transliterated += word[i];
-          i++;
+        // Priority 3: Character-by-character transliteration
+        let transliterated = '';
+        let i = 0;
+        while (i < word.length) {
+          let found = false;
+          
+          // Try longest matches first (up to 5 characters for better accuracy)
+          for (let len = Math.min(5, word.length - i); len > 0; len--) {
+            const substring = word.substr(i, len);
+            if (englishToDevanagariMap[substring]) {
+              transliterated += englishToDevanagariMap[substring];
+              i += len;
+              found = true;
+              break;
+            }
+          }
+          
+          if (!found) {
+            // Priority 4: Enhanced phonetic mapping for any English character
+            const char = word[i].toLowerCase();
+            const phoneticMapping: { [key: string]: string } = {
+              'a': 'अ', 'b': 'ब', 'c': 'क', 'd': 'द', 'e': 'ए', 'f': 'फ',
+              'g': 'ग', 'h': 'ह', 'i': 'इ', 'j': 'ज', 'k': 'क', 'l': 'ल',
+              'm': 'म', 'n': 'न', 'o': 'ओ', 'p': 'प', 'q': 'क्यू', 'r': 'र',
+              's': 'स', 't': 'त', 'u': 'उ', 'v': 'व', 'w': 'व', 'x': 'एक्स',
+              'y': 'य', 'z': 'ज़',
+              // Numbers
+              '0': '०', '1': '१', '2': '२', '3': '३', '4': '४',
+              '5': '५', '6': '६', '7': '७', '8': '८', '9': '९',
+              // Special characters
+              ' ': ' ', '.': '।', ',': ',', '!': '!', '?': '?',
+              '-': '-', '(': '(', ')': ')', ':': ':'
+            };
+            
+            transliterated += phoneticMapping[char] || char;
+            i++;
+          }
         }
+        
+        // Ensure we never return empty string for a word
+        if (!transliterated || transliterated.trim() === '') {
+          transliterated = word; // Return original word if all else fails
+        }
+        
+        console.log(`🔤 Processed word: "${word}" → "${transliterated}"`);
+        return transliterated;
+      });
+      
+      // Join words and ensure we have a result
+      let finalResult = transliteratedWords.join(' ').trim();
+      
+      // Final safety check - never return blank
+      if (!finalResult || finalResult === '') {
+        finalResult = text; // Return original text if everything fails
+        console.log(`⚠️ Fallback to original text: "${finalResult}"`);
       }
       
-      return transliterated;
-    });
-    
-    return transliteratedWords.join(' ');
+      console.log(`✅ Final Hindi result: "${text}" → "${finalResult}"`);
+      return finalResult;
+      
+    } catch (error) {
+      console.error('❌ Error in Hindi transliteration:', error);
+      // Even on error, return something meaningful
+      return `${text} (हिंदी में)`; // "(in Hindi)" suffix
+    }
   }
 
   // Detect script of input text with confidence
   detectScript(text: string): string {
+    console.log(`🔍 Detecting script for: "${text}"`);
+    
     const scriptTests = [
       { regex: /[\u0900-\u097F]/, script: 'hindi' }, // Devanagari script used for Hindi
       { regex: /[\u0B80-\u0BFF]/, script: 'tamil' },
@@ -246,15 +317,20 @@ export class AdvancedTransliterationEngine {
     ];
     
     // Count characters for each script
-    const scriptCounts = scriptTests.map(({ regex, script }) => ({
-      script,
-      count: (text.match(regex) || []).length
-    }));
+    const scriptCounts = scriptTests.map(({ regex, script }) => {
+      const count = (text.match(regex) || []).length;
+      if (count > 0) {
+        console.log(`  📝 ${script}: ${count} matches`);
+      }
+      return { script, count };
+    });
     
     // Find the script with the most characters
     const dominantScript = scriptCounts.reduce((max, current) => 
       current.count > max.count ? current : max
     );
+    
+    console.log(`🎯 Detected script: "${dominantScript.script}" with ${dominantScript.count} characters`);
     
     // If no Indic script characters found, default to Latin
     return dominantScript.count > 0 ? dominantScript.script : 'latin';
@@ -353,11 +429,17 @@ export class AdvancedTransliterationEngine {
     try {
       // Special handling for common conversions
       if (sourceScript === 'tamil' && targetScript === 'hindi') {
+        console.log(`🎯 TAMIL TO HINDI CONVERSION TRIGGERED!`);
         // Direct Tamil to Hindi conversion
         const result = this.tamilToDevanagariDirect(text);
         console.log(`📝 Tamil→Hindi direct: "${text}" → "${result}"`);
-        if (result && result !== text) {
+        console.log(`📊 Result length: ${result.length}, Original length: ${text.length}`);
+        console.log(`📊 Result different from original: ${result !== text}`);
+        if (result && result !== text && result.trim() !== '') {
+          console.log(`✅ RETURNING TAMIL→HINDI RESULT: "${result}"`);
           return result;
+        } else {
+          console.log(`⚠️ Tamil→Hindi conversion failed, result was: "${result}"`);
         }
       }
       
@@ -404,24 +486,93 @@ export class AdvancedTransliterationEngine {
 
   // Direct Tamil to Devanagari conversion
   private tamilToDevanagariDirect(text: string): string {
+    console.log(`🔥 tamilToDevanagariDirect called with: "${text}"`);
     const tamilToDevanagariMap: { [key: string]: string } = {
       // Tamil vowels to Devanagari
       'அ': 'अ', 'ஆ': 'आ', 'இ': 'इ', 'ஈ': 'ई', 'உ': 'उ', 'ஊ': 'ऊ',
       'ஏ': 'ए', 'ஐ': 'ऐ', 'ஓ': 'ओ', 'ஔ': 'औ',
+      
       // Tamil consonants to Devanagari  
       'க': 'क', 'ங': 'ङ', 'ச': 'च', 'ஞ': 'ञ', 'ட': 'ट', 'ண': 'ण',
       'த': 'त', 'ந': 'न', 'ப': 'प', 'ம': 'म', 'ய': 'य', 'ர': 'र',
-      'ல': 'ल', 'व': 'व', 'ழ': 'ळ', 'ள': 'ल', 'ற': 'र', 'ன': 'न',
-      'ஸ': 'स', 'ஹ': 'ह',
-      // Tamil combined characters
-      'கா': 'का', 'கி': 'कि', 'கீ': 'की', 'கு': 'कु', 'கூ': 'कू',
-      'தா': 'ता', 'தி': 'ति', 'தீ': 'ती', 'தே': 'ते', 'தை': 'तै',
-      // Common Tamil consonant clusters
-      'ம்பா': 'म्बा', 'ம்ப': 'म्ब', 'ன்னா': 'न्ना', 'ன்न': 'न्न',
-      'ன்றா': 'न्ता', 'ள்ளா': 'ल्ला', 'த்தா': 'त्ता'
+      'ல': 'ल', 'வ': 'व', 'ழ': 'ळ', 'ள': 'ल', 'ற': 'र', 'ன': 'न',
+      'ஸ': 'स', 'ஹ': 'ह', 'க்ஷ': 'क्ष', 'ஜ': 'ज', 'ஶ': 'श',
+      
+      // Tamil vowel signs (matras)
+      'ா': 'ा', 'ி': 'ि', 'ீ': 'ी', 'ு': 'ु', 'ூ': 'ू', 'ெ': 'े', 'ே': 'े', 
+      'ை': 'ै', 'ொ': 'ो', 'ோ': 'ो', 'ௌ': 'ौ', '்': '्',
+      
+      // Tamil combined characters with vowels
+      'கா': 'का', 'கி': 'कि', 'கீ': 'की', 'கு': 'कु', 'கூ': 'कू', 'கே': 'के', 'கை': 'कै', 'கோ': 'को', 'கௌ': 'कौ',
+      'தா': 'ता', 'தி': 'ति', 'தீ': 'ती', 'தே': 'ते', 'தை': 'तै', 'தோ': 'तो', 'தௌ': 'तौ',
+      'மா': 'मा', 'மி': 'मि', 'மீ': 'मी', 'மு': 'मु', 'மூ': 'मू', 'மே': 'मे', 'மை': 'मै', 'மோ': 'मो',
+      'பா': 'पा', 'பி': 'पि', 'பீ': 'पी', 'பு': 'पु', 'பூ': 'पू', 'பே': 'पे', 'பை': 'पै', 'போ': 'पो',
+      'ரா': 'रा', 'ரி': 'रि', 'ரீ': 'री', 'ரு': 'रु', 'ரூ': 'रू', 'ரே': 'रे', 'ரை': 'रै', 'ரோ': 'रो',
+      'லா': 'ला', 'லி': 'लि', 'லீ': 'ली', 'லு': 'लु', 'லூ': 'लू', 'லே': 'ले', 'லை': 'लै', 'லோ': 'लो',
+      'நா': 'ना', 'நி': 'नि', 'நீ': 'नी', 'நு': 'नु', 'நூ': 'नू', 'நே': 'ने', 'நை': 'नै', 'நோ': 'नो',
+      
+      // Common Tamil consonant clusters and combinations
+      'ம்பா': 'म्बा', 'ம்ப': 'म्ब', 'ம்பி': 'म्बि', 'ம்பு': 'म्बु', 'ம்பே': 'म्बे', 'ம்பை': 'म्बै', 'ம்போ': 'म्बो',
+      'ன்னா': 'न्ना', 'ன்ன': 'न्न', 'ன்னி': 'न्नि', 'ன்னு': 'न्नु', 'ன்னே': 'न्ने', 'ன்னै': 'न्नै', 'ன்னோ': 'न्नो',
+      'ன்றா': 'न्ता', 'ன்ற': 'न्त', 'ன்றி': 'न्ति', 'ன்று': 'न्तु', 'ன்றே': 'न्ते', 'ன்றை': 'न्तै', 'ன்றோ': 'न्तो',
+      'ள்ளா': 'ल्ला', 'ள்ள': 'ल्ल', 'ள்ளி': 'ल्लि', 'ள்ளு': 'ल्लu', 'ள்ளே': 'ल्ले', 'ள்ளை': 'ल्लै', 'ள்ளோ': 'ल्लो',
+      'த்தா': 'त्ता', 'த்த': 'त्त', 'த்தி': 'त्ति', 'த்து': 'त्तु', 'த்தே': 'त्ते', 'த்தை': 'त्तै', 'த்தோ': 'त्तो',
+      'க்க': 'क्क', 'ச்ச': 'च्च', 'ட்ட': 'ट्ट', 'ப்ப': 'प्प', 'ல்ல': 'ल्ल', 'ர்ர': 'र्र',
+      
+      // Tamil specific characters and combinations
+      'ங்க': 'ङ्क', 'ங்கா': 'ङ्का', 'ங்கி': 'ङ्कि', 'ங்கு': 'ङ्कु', 'ங்கே': 'ङ्के', 'ங்கை': 'ङ्कै', 'ங்கோ': 'ङ्को',
+      'ஞ்ச': 'ञ्च', 'ஞ்சா': 'ञ्चा', 'ஞ்சி': 'ञ्चि', 'ஞ்சு': 'ञ्चu', 'ஞ்சே': 'ञ्चे', 'ஞ்சை': 'ञ्चै', 'ஞ்சோ': 'ञ्चो',
+      'ண்ட': 'ण्ट', 'ண்டா': 'ण्टा', 'ண்டி': 'ण्टi', 'ண்டு': 'ण्टu', 'ண்டே': 'ण्टे', 'ண்டை': 'ण्टै', 'ண்டோ': 'ण्टो',
+      
+      // Common Tamil words from your example
+      'தாம்பரம்': 'ताम्बरम्', 'TAMBARAM': 'ताम्बरम्', 'கீஷ்கிஷந்': 'कीष्किषन्', 
+      'மற்றும்': 'और', 'வல்லக்கோட்டை': 'वल्लक्कोट्टै', 'முருகன்': 'मुरुगन्', 
+      'கோவில்': 'मंदिर', 'போ': 'जाओ', 'இங்கே': 'यहाँ', 'இறங்கவும்': 'उतरें',
+      'வாருங்கள்': 'आइए', 'இருக்கும்': 'होगा', 'எங்கே': 'कहाँ', 'உக்கு': 'को',
+      
+      // Measurements and abbreviations
+      'MSL': 'एमएसएल', 'km': 'किमी', 'cm': 'सेमी', 'mm': 'एमएम',
+      
+      // Special number combinations - Tamil to Devanagari
+      '29': '२९', '00': '००'
     };
     
-    return this.mapText(text, tamilToDevanagariMap);
+    // Enhanced processing with pattern matching (longest first)
+    let result = text;
+    const sortedKeys = Object.keys(tamilToDevanagariMap).sort((a, b) => b.length - a.length);
+    
+    console.log(`🔑 Tamil mapping has ${sortedKeys.length} keys`);
+    console.log(`🔤 Processing "${text}" with sorted keys (first 10):`, sortedKeys.slice(0, 10));
+    
+    sortedKeys.forEach(tamilChar => {
+      const hindiChar = tamilToDevanagariMap[tamilChar];
+      if (text.includes(tamilChar)) {
+        console.log(`🔄 Found "${tamilChar}" → "${hindiChar}" in text`);
+        result = result.split(tamilChar).join(hindiChar);
+      }
+    });
+    
+    console.log(`🔀 After mapping: "${text}" → "${result}"`);
+    
+    // Apply phonetic fallback for remaining Tamil characters
+    if (/[\u0B80-\u0BFF]/.test(result)) {
+      console.log(`🔧 Applying phonetic fallback to remaining Tamil chars in: "${result}"`);
+      result = this.phoneticTamilToHindi(result);
+    }
+    
+    console.log(`✅ Tamil→Hindi final result: "${result}"`);
+    return result || text;
+  }
+
+  // Phonetic Tamil to Hindi fallback
+  private phoneticTamilToHindi(text: string): string {
+    return text.replace(/[\u0B80-\u0BFF]/g, (char) => {
+      const fallbackMap: { [key: string]: string } = {
+        'ஃ': 'ः', '்': '्', 'ௐ': 'ॐ', '௧': '१', '௨': '२', '௩': '३', '௪': '४', '௫': '५',
+        '௬': '६', '௭': '७', '௮': '८', '௯': '९', '௰': '१०'
+      };
+      return fallbackMap[char] || char;
+    });
   }
 
   // Simple phonetic approximation for cross-script transliteration

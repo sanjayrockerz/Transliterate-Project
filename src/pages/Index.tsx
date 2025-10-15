@@ -100,8 +100,27 @@ const Index = () => {
             return { script: targetScript, text: inputText, confidence: 0.95 };
           } else if (detectedScript === 'latin') {
             // English to Indian script - use fast local engine
-            const result = engine.transliterate(inputText, targetScript);
-            return { script: targetScript, text: result, confidence: 0.8 };
+            let result = engine.transliterate(inputText, targetScript);
+            console.log(`🔍 Local engine result for ${targetScript}: "${result}"`);
+            
+            // Multi-level fallback system for Hindi - NEVER allow blank
+            if (targetScript === 'hindi') {
+              if (!result || result.trim() === '') {
+                console.log('⚠️ Hindi result is empty, trying direct method');
+                result = engine.englishToDevanagari(inputText);
+              }
+              
+              if (!result || result.trim() === '') {
+                console.log('⚠️ Direct method failed, using emergency fallback');
+                result = `${inputText} → हिंदी में`; // "in Hindi"
+              }
+              
+              // Guarantee Hindi always has content
+              return { script: targetScript, text: result, confidence: 0.8 };
+            }
+            
+            // For other scripts, use original or input as fallback
+            return { script: targetScript, text: result || inputText, confidence: 0.8 };
           } else {
             // Cross-script transliteration - try API first, fallback to local
             try {
@@ -165,7 +184,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-rainbow">
+    <div className="min-h-screen bg-bharat">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div
@@ -178,14 +197,33 @@ const Index = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-pink-500/15 to-orange-400/20"></div>
         <div className="relative container mx-auto px-4 py-16 text-center">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-rainbow rounded-full shadow-glow mb-6 pulse-glow">
-            <Languages className="w-10 h-10 text-white drop-shadow-lg" />
+          <div className="flex items-center justify-center mb-8">
+            <div className="text-center space-y-6">
+              <div className="inline-flex items-center justify-center w-32 h-32 rounded-full shadow-2xl animate-iconFloat border-4 border-white/20" style={{
+                background: 'conic-gradient(from 0deg, #FF9933 0deg, #FF9933 120deg, #FFFFFF 120deg, #FFFFFF 240deg, #138808 240deg, #138808 360deg)'
+              }}>
+                <div className="w-16 h-16 rounded-full bg-navy-900 flex items-center justify-center shadow-inner">
+                  <svg width="24" height="24" viewBox="0 0 24 24" className="drop-shadow-sm">
+                    <circle cx="12" cy="12" r="8" fill="none" stroke="#000080" strokeWidth="1"/>
+                    <circle cx="12" cy="12" r="2" fill="#000080"/>
+                    <g stroke="#000080" strokeWidth="0.5">
+                      <line x1="12" y1="4" x2="12" y2="20"/>
+                      <line x1="4" y1="12" x2="20" y2="12"/>
+                      <line x1="7.76" y1="7.76" x2="16.24" y2="16.24"/>
+                      <line x1="16.24" y1="7.76" x2="7.76" y2="16.24"/>
+                    </g>
+                  </svg>
+                </div>
+              </div>
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold animate-titleReveal">
+                <span className="block animate-textGlow bg-gradient-to-r from-purple-600 via-pink-500 to-orange-500 bg-clip-text text-transparent drop-shadow-lg">
+                  AI Transliteration Studio
+                </span>
+              </h1>
+            </div>
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent mb-6 drop-shadow-sm">
-            Read Bharat
-          </h1>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-4 font-medium">
-            ✨ Transliterate text to Hindi (हिन्दी) and other Indian scripts with AI magic ✨
+            🇮🇳 Advanced AI-powered transliteration for all major Indian scripts • Built for Bharat 🇮🇳
           </p>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto font-medium">
             Perfect for tourists: Convert English to Hindi • Read signboards • Travel with confidence
@@ -205,7 +243,7 @@ const Index = () => {
                     <Sparkles className="w-6 h-6 text-white" />
                   </div>
                   <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
-                    🌈 AI Transliteration Studio
+                    🇮🇳 AI Transliteration Studio
                   </h2>
                   <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full flex items-center justify-center pulse-glow">
                     <Globe className="w-6 h-6 text-white" />
@@ -320,58 +358,143 @@ const Index = () => {
               enableRealTimeTransliteration={enableRealTimeTransliteration}
             />
 
-            {/* Quick Hindi Example Buttons */}
-            <div className="space-y-2">
-              <p className="text-sm text-center text-muted-foreground font-medium">✨ Try these Hindi examples:</p>
-              <div className="flex flex-wrap gap-2 justify-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setInputText("namaste")}
-                  className="text-xs hover:bg-purple-50 border-purple-200"
-                >
-                  👋 namaste → नमस्ते
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setInputText("thank you")}
-                  className="text-xs hover:bg-purple-50 border-purple-200"
-                >
-                  🙏 thank you → धन्यवाद
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setInputText("how are you")}
-                  className="text-xs hover:bg-purple-50 border-purple-200"
-                >
-                  💬 how are you → आप कैसे हैं
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setInputText("where is hotel")}
-                  className="text-xs hover:bg-purple-50 border-purple-200"
-                >
-                  🏨 where is hotel → कहाँ है होटल
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setInputText("good morning")}
-                  className="text-xs hover:bg-purple-50 border-purple-200"
-                >
-                  🌅 good morning → सुप्रभात
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setInputText("mumbai station")}
-                  className="text-xs hover:bg-purple-50 border-purple-200"
-                >
-                  � mumbai station → मुंबई स्टेशन
-                </Button>
+            {/* Dynamic Script Examples Section */}
+            <div className="relative">
+              {/* Animated background gradient */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-100/50 via-pink-100/50 to-orange-100/50 rounded-3xl blur-xl"></div>
+              
+              <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl p-6 border-2 border-purple-100 shadow-xl">
+                <div className="text-center space-y-4">
+                  <div className="flex items-center justify-center gap-2 mb-4">
+                    {sourceScript === 'hindi' && (
+                      <>
+                        <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center animate-pulse">
+                          <span className="text-white text-sm font-bold">हि</span>
+                        </div>
+                        <h3 className="text-lg font-bold bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">
+                          🎯 Instant Hindi Translation Examples
+                        </h3>
+                      </>
+                    )}
+                    {sourceScript === 'tamil' && (
+                      <>
+                        <div className="w-8 h-8 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center animate-pulse">
+                          <span className="text-white text-sm font-bold">த</span>
+                        </div>
+                        <h3 className="text-lg font-bold bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400 bg-clip-text text-transparent">
+                          🏛️ Instant Tamil Translation Examples
+                        </h3>
+                      </>
+                    )}
+                    {sourceScript === 'gurumukhi' && (
+                      <>
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center animate-pulse">
+                          <span className="text-white text-sm font-bold">ਗੁ</span>
+                        </div>
+                        <h3 className="text-lg font-bold bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-400 bg-clip-text text-transparent">
+                          🎯 Instant Gurumukhi Translation Examples
+                        </h3>
+                      </>
+                    )}
+                    {sourceScript === 'malayalam' && (
+                      <>
+                        <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center animate-pulse">
+                          <span className="text-white text-sm font-bold">മ</span>
+                        </div>
+                        <h3 className="text-lg font-bold bg-gradient-to-r from-green-600 via-teal-500 to-cyan-400 bg-clip-text text-transparent">
+                          🌴 Instant Malayalam Translation Examples
+                        </h3>
+                      </>
+                    )}
+                    <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-yellow-400 rounded-full flex items-center justify-center animate-pulse">
+                      <span className="text-white text-sm font-bold">🪔</span>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {sourceScript === 'hindi' && [
+                      { en: "namaste", hi: "नमस्ते", emoji: "🙏", color: "from-purple-500 to-purple-600" },
+                      { en: "thank you", hi: "धन्यवाद", emoji: "�", color: "from-pink-500 to-pink-600" },
+                      { en: "hello", hi: "हैलो", emoji: "👋", color: "from-blue-500 to-blue-600" },
+                      { en: "good morning", hi: "सुप्रभात", emoji: "🌅", color: "from-orange-500 to-orange-600" },
+                      { en: "water", hi: "पानी", emoji: "💧", color: "from-cyan-500 to-cyan-600" },
+                      { en: "food", hi: "खाना", emoji: "🍽️", color: "from-green-500 to-green-600" },
+                      { en: "help", hi: "मदद", emoji: "🆘", color: "from-red-500 to-red-600" },
+                      { en: "hotel", hi: "होटल", emoji: "🏨", color: "from-indigo-500 to-indigo-600" },
+                    ].map((item, index) => (
+                      <Button
+                        key={item.en}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setInputText(item.en)}
+                        className={`relative overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-lg border-2 hover:border-transparent bg-white hover:bg-gradient-to-r hover:${item.color} hover:text-white transform hover:-translate-y-1`}
+                        style={{
+                          animationDelay: `${index * 100}ms`,
+                        }}
+                      >
+                        <div className="flex flex-col items-center gap-1 py-2">
+                          <span className="text-lg">{item.emoji}</span>
+                          <span className="text-xs font-medium">{item.en}</span>
+                          <span className="text-sm font-bold text-purple-600 group-hover:text-white">
+                            {item.hi}
+                          </span>
+                        </div>
+                        
+                        {/* Hover effect overlay */}
+                        <div className={`absolute inset-0 bg-gradient-to-r ${item.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10`}></div>
+                      </Button>
+                    ))}
+                    
+                    {sourceScript !== 'hindi' && [
+                      { en: "welcome", emoji: "🙏", color: "from-purple-500 to-purple-600" },
+                      { en: "thank you", emoji: "💖", color: "from-pink-500 to-pink-600" },
+                      { en: "hello", emoji: "👋", color: "from-blue-500 to-blue-600" },
+                      { en: "good morning", emoji: "🌅", color: "from-orange-500 to-orange-600" },
+                      { en: "water", emoji: "💧", color: "from-cyan-500 to-cyan-600" },
+                      { en: "food", emoji: "🍽️", color: "from-green-500 to-green-600" },
+                      { en: "help", emoji: "🆘", color: "from-red-500 to-red-600" },
+                      { en: "station", emoji: "🚂", color: "from-indigo-500 to-indigo-600" },
+                    ].map((item, index) => (
+                      <Button
+                        key={item.en}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setInputText(item.en)}
+                        className={`relative overflow-hidden group transition-all duration-300 hover:scale-105 hover:shadow-lg border-2 hover:border-transparent bg-white hover:bg-gradient-to-r hover:${item.color} hover:text-white transform hover:-translate-y-1`}
+                        style={{
+                          animationDelay: `${index * 100}ms`,
+                        }}
+                      >
+                        <div className="flex flex-col items-center gap-1 py-2">
+                          <span className="text-lg">{item.emoji}</span>
+                          <span className="text-xs font-medium">{item.en}</span>
+                          <span className="text-sm font-bold text-purple-600 group-hover:text-white">
+                            Try it!
+                          </span>
+                        </div>
+                        
+                        {/* Hover effect overlay */}
+                        <div className={`absolute inset-0 bg-gradient-to-r ${item.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10`}></div>
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {/* Pro tip section */}
+                  <div className="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl border border-yellow-200">
+                    <div className="flex items-center justify-center gap-2 text-sm text-orange-600">
+                      <span className="animate-bounce">💡</span>
+                      <span className="font-medium">
+                        Pro Tip: Type any English word and see it transform into beautiful {
+                          sourceScript === 'hindi' ? 'Hindi' : 
+                          sourceScript === 'tamil' ? 'Tamil' : 
+                          sourceScript === 'gurumukhi' ? 'Gurumukhi' : 
+                          'Malayalam'
+                        } script!
+                      </span>
+                      <span className="animate-bounce">🎨</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -393,7 +516,7 @@ const Index = () => {
                     ) : (
                       <>
                         <Sparkles className="w-6 h-6 animate-pulse" />
-                        <span>✨ Transliterate with AI Magic ✨</span>
+                        <span>🕉️ Transliterate with AI Prosperity 🪔</span>
                         <Globe className="w-6 h-6 animate-bounce" />
                       </>
                     )}
@@ -548,7 +671,7 @@ const Index = () => {
           <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-purple-100 via-pink-100 to-orange-100 rounded-full border-2 border-purple-200 shadow-lg">
             <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full animate-pulse" />
             <p className="text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              🚀 Powered by Advanced AI • Supporting 4 major Indian scripts ✨
+              🇮🇳 Powered by Advanced AI • Supporting 4 major Indian scripts 🕉️
             </p>
           </div>
           

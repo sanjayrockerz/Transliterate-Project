@@ -1,17 +1,17 @@
-# 🌈 Read Bharat - Advanced Indian Script Transliteration
+# 🕉️ Read Bharat - Advanced Indian Script Transliteration
 
 [![Live Demo](https://img.shields.io/badge/🚀-Live%20Demo-brightgreen)](http://localhost:8082)
 [![Made with Vite](https://img.shields.io/badge/Made%20with-Vite-646CFF)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-18-61DAFB)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)](https://www.typescriptlang.org/)
 
-> **Transliterate street signs and text across Indian scripts with AI magic ✨**
+> **Transliterate street signs and text across Indian scripts with AI prosperity 🪔**
 
 A beautiful, modern web application for transliterating text between multiple Indian scripts including Devanagari (Hindi), Tamil, Malayalam, and Gurmukhi. Perfect for travelers, students, and professionals working across Indian languages.
 
 ## 🎯 **Features**
 
-### ✨ **Core Transliteration**
+### 🕉️ **Core Transliteration**
 - **4 Major Scripts**: Devanagari, Tamil, Malayalam, Gurmukhi
 - **Cross-Script Conversion**: Direct conversion between any Indian scripts
 - **AI-Powered Engine**: Advanced transliteration with 95%+ accuracy
@@ -142,17 +142,17 @@ VITE_SUPABASE_ANON_KEY=your_supabase_key
 ## 🎨 **UI Customization**
 
 ### Color Scheme
-The app uses a vibrant rainbow theme with customizable CSS variables:
+The app uses a vibrant Bharat theme with Indian flag colors:
 
 ```css
 :root {
   --primary: 280 95% 65%;        /* Purple */
   --secondary: 200 85% 55%;      /* Blue */  
   --accent: 45 95% 60%;          /* Orange */
-  --gradient-rainbow: linear-gradient(135deg, 
-    hsl(280 95% 65%), 
-    hsl(320 90% 70%), 
-    hsl(45 95% 60%)
+  --gradient-bharat: linear-gradient(135deg, 
+    #ff9933,  /* Saffron */
+    #ffffff,  /* White */
+    #138808   /* Green */
   );
 }
 ```
@@ -160,7 +160,7 @@ The app uses a vibrant rainbow theme with customizable CSS variables:
 ### Animation Classes
 - `.bounce-hover`: Hover animations
 - `.pulse-glow`: Glowing effects
-- `.bg-rainbow`: Animated gradient backgrounds
+- `.bg-bharat`: Animated gradient backgrounds
 - `.shimmer`: Loading shimmer effects
 
 ## 🧪 **Testing**
